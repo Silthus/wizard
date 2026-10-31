@@ -69,6 +69,11 @@ export async function runTui(
   // A tool the intro handed off to ends the run once its analytics flush.
   let handedOff = false;
 
+  const reportCancellation = async (): Promise<void> => {
+    await analytics.shutdown('cancelled');
+    await flushAnalytics();
+  };
+
   // Flush a terminal-phase push so the web app sees the run ended in error
   // rather than hanging on the last "running" snapshot. Registered before the
   // stream exists: Ctrl-C on the intro must still restore the terminal and run
@@ -83,18 +88,18 @@ export async function runTui(
     if (tui?.store.session.runPhase === RunPhase.Running) {
       tui.store.setRunPhase(RunPhase.Error);
     }
+    try {
+      tui?.unmount();
+    } catch {
+      // terminal may already be torn down
+    }
     void Promise.all([
       stream?.shutdown(2000, 'cancelled'),
-      analytics.shutdown('cancelled'),
+      reportCancellation(),
     ])
       .catch(() => logToFile('[run-wizard] cancellation shutdown failed'))
       .finally(() => {
         unregisterShutdown?.();
-        try {
-          tui?.unmount();
-        } catch {
-          // terminal may already be torn down
-        }
         exit.end(signal === 'SIGTERM' ? 143 : 130);
       });
   };
