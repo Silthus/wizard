@@ -41,7 +41,7 @@ export const config: ProgramConfig = createSkillProgram({
     'and what the person still has to do.',
   successMessage: `Transactional email is set up. View the report at ./${REPORT_FILE}`,
   reportFile: REPORT_FILE,
-  docsUrl: 'https://posthog.com/docs/workflows/transactional-email-api',
+  docsUrl: 'https://posthog.com/docs/workflows/transactional-emails',
   spinnerMessage: 'Setting up transactional email...',
   estimatedDurationMinutes: 5,
   abortCases: TRANSACTIONAL_EMAIL_ABORT_CASES,
